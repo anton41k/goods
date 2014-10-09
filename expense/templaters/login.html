@@ -1,0 +1,53 @@
+{%extends "start.html"%}
+{%block title%}Авторизация{%endblock%}
+{%block style%}
+<style type="text/css">
+{%if form.username.errors%}
+.field1  {
+	color: red;
+}
+.field1 a{
+	color: red;
+	font-size: 10px;
+	padding: 4px 5px;
+	margin: 0 0 3px;
+}{%endif%}
+{%if form.password.errors%}
+.field  {
+	color: red;
+}
+.field a{
+	color: red;
+	font-size: 10px;
+	padding: 4px 5px;
+	margin: 0 0 3px;
+}{%endif%}
+</style>{%endblock%}
+{%block content%}
+<center>
+<h1>Авторизация</h1>
+<hr>
+		{%if form.errors%}
+	<p style="color:red;">
+	  Исправте {{form.errors|pluralize:"следующую ошибку:, следующие ошибки:"}}
+	</p>
+		{%endif%}
+  <form action="/login/" method="POST">    {% csrf_token %}
+	<div class="field1">
+		<lable for="id_username">Введите логин или e-mail:</lable><br>
+	{%for error in form.username.errors %}
+		<a>{{error}}</a><br>
+	{%endfor%}
+		{{form.username}}
+	</div>
+	<div class="field">
+		<lable for="password">Пароль:</lable><br>
+	{%for error in form.password.errors %}
+		<a>{{error}}</a><br>
+	{%endfor%}
+		{{form.password}}
+	</div>
+    <input type="submit" class="btn btn-primary" value="Войти"/>
+  </form>
+</center>
+{%endblock%}

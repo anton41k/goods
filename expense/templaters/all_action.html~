@@ -1,0 +1,88 @@
+
+{%load goods_extras%}
+{%load i18n%}
+    <table border=1 class="goods">
+     <tr>
+      <th rowspan=3>Наименование товара</th>
+      <th rowspan=3>Ос<br>та<br>ток</th>
+      <th colspan={{day_month}}>
+{%if action == 'expense'%}
+Расход
+{%elif action == 'retrieve'%}
+ Возврат
+{%elif action == 'coming'%}
+Приход
+{%endif%}
+ на 
+        <div class="inline"><a class="month" onclick="month('month','mmonth')"><div id="mmonth">{%blocktrans with date|date:"N" as rus_month%}{{rus_month}}{%endblocktrans%}</div> </a>
+
+<form id="month" class="test_month" method="post" action="" hidden>{% csrf_token %}
+{{form.month}}
+<input id="submit" onclick="submit_month_all('{{action}}')" type="submit" value="ok">
+</form></div>
+      </th>
+      <th rowspan=3>Сум<br>ма</th>
+     </tr>
+     <tr>
+      <th colspan={{day_month}}>Дата</th>
+     </tr>
+     <tr id="day">
+      {%for day in list_day_month%}
+        <td><b>{{day}}</b></td>
+      {%endfor%}
+     </tr>
+      {%for goods in goods_list%}
+
+        <tr id="line">
+         <td width=295 id="goods">
+          {{goods}}
+         </td>
+         <td id="amount"><div id="amount_all{{goods.pk}}">
+          {{goods.amount}}
+         </div></td>
+          {%for day in list_day_month%}
+         <td width=25>
+           {%if day not in goods|list_date:month_action%}
+
+<div class="input" id="day{{day}}goods{{goods.pk}}">
+<form class="day{{day}}goods{{goods.pk}}" method="post" action="">{% csrf_token %}
+             <input type=text name="{{action}}" pattern="^[0-9]+$" value=""/>
+<div hidden>
+<input type=text name="month" value="{{month}}"/>
+<input type=text name="goods" value="{{goods.pk}}"/>
+<input type=text name="date" value="{{day}}"/>
+<input onclick="subm_all('day{{day}}goods{{goods.pk}}','{{action}}','{{goods.pk}}','{{day}}')" type="submit" value="d">
+</div>
+</form>
+</div>
+           {%endif%}
+           {%for exp in goods.expense.all%}
+             {%if day == exp.date|date:"j" and month_str == exp.date|date:"n"%}
+               <div class="input">
+{%if action == 'expense' and exp.expense%}
+{{exp.expense}}
+{%elif action == 'retrieve' and exp.retrieve%}
+{{exp.retrieve}}
+{%elif action == 'coming' and exp.coming%}
+{{exp.coming}}
+{%endif%}
+               </div>
+
+             {%endif%}
+           {%endfor%}
+         </td>
+          {%endfor%}<td><div id="sum_goods_all{{goods.pk}}">{{goods|sum_expense_goods:month_action}}</div></td>
+        </tr>
+
+      {%endfor%}
+      <tr><td></td><td></td>
+       {%for day in list_day_month%}
+        <td id="day"><div id="sum_day_all{{day}}">{{day|sum_expense_day_all:month_action}}</div></td>
+       {%endfor%}
+        <td><div id="sum_all">{{brand|sum_expense_all:month_action}}</div></td>
+      </tr>
+      <tr><td align="right">Сумма:&nbsp;&nbsp;</td>
+      <td><div id="sum_amount">{{brand|count_goods_all}}</div></td></tr>
+    </table>
+
+

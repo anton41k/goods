@@ -1,0 +1,194 @@
+{%extends "start.html"%}
+{%block title%}Товар{%endblock%}
+{%load staticfiles%}
+{%load goods_extras%}
+{%load i18n%}
+
+{%block content%}
+
+{{brand}}
+<div id="species"></div>
+<div id="res">
+<table border=1 class="head">
+  <caption><h2>Таблица 
+{%if action == 'expense'%}
+расхода
+{%elif action == 'retrieve'%}
+возврата
+{%elif action == 'coming'%}
+прихода
+{%endif%}
+ товара</h2>
+  </caption>
+  <tr>
+    <th>Тип товара</th>
+    <th>Остаток</th>
+  </tr>
+{%for spacies in spacies_list%}
+  <tr>
+   <td class="spacies1" width=300>
+     &nbsp;&nbsp;<a onclick="list_spacies('brand{{spacies.spacies}}')">{{spacies.spacies}}</a>
+   </td>
+   <td class="expense" width=900><div id="sum_spacies">
+    {{spacies|count_goods_spacies}}</div>
+   </td>
+  </tr>
+  <tr><td colspan=2>
+    <div id="brand{{spacies.spacies}}" hidden>
+    <table border=0>
+      {%for g in spacies.brand_set.all%}
+          
+      <tr>
+       <td colspan=2 class="brand">
+         <a onclick="list_brand('{{g.brand|cut:' '}}','{{action}}','{{g.brand}}')">{{g.brand}}</a>
+       </td>
+      </tr>
+      <tr>
+       <td colspan=2>
+         <div id="{{g.brand|cut:' '}}" hidden>
+     {%include 'detail_goods.html'%}
+         </div>
+       </td>
+      </tr>
+
+
+{%endfor%}
+</table>
+</div>
+</td></tr>
+{%endfor%}
+<tr>
+<td class="spacies1">
+&nbsp;&nbsp;<a onclick="all_goods('{{action}}')">Общий 
+{%if action == 'expense'%}
+расход
+{%elif action == 'retrieve'%}
+возврат
+{%elif action == 'coming'%}
+приход
+{%endif%}</a>
+</td>
+<td><div id="sum_amoun" class="sum_amount_alls">{{brand|count_goods_all}}</div></td></tr>
+      <tr>
+       <td colspan=2>
+         <div id="all_action" hidden>
+      {%include 'all_action.html'%}
+         </div>
+       </td>
+      </tr>
+</table>
+</div>
+{%endblock%}
+{{day|sum_expense_day1:brand|sum_expense_day2:month_action}}
+
+<script type="text/javascript">
+$(function() {
+	$("#test").submit(function(event){event.preventDefault();
+	var page=$('.amenu1').attr('value');var  form  =  $('form#test');
+	$.get(("/xhr_proc/"),
+{data:form.serialize()},
+	function(data){
+	$('#content').html(data);});});});
+</script>
+<script type="text/javascript">
+$(function() {
+	$(".test").submit(function(event){event.preventDefault();
+	var page=$('.amenu1').attr('value');var  form = $('form.test');
+	$.ajax({
+                type:"POST",
+                url:"/xhr_proc/",
+		data:form.serialize(),
+	success:function(data){
+	$('#content').html(data);}});});});
+</script>
+
+<form class="test" method="post" action="{{action}}" >{% csrf_token %}
+<table>
+expense<input type=text name="expense" value=""/>
+goods<input type=text name="goods" value=""/>
+date<input type=text name="date" value=""/>
+
+<input type=submit  value="j"/>
+</table>
+
+</form>
+	<form class="test" method="post" action="{{action}}" >{% csrf_token %}
+	<table>
+	expense<input type=text name="expense" value=""/>
+	goods<input type=text name="goods" value=""/>
+	date<input type=text name="date" value=""/>
+
+	<input type=submit  value="j"/>
+	</table>
+
+	</form>
+<input type=text class="amenu1" name="goods" value="1"/>
+<li class="amenu" name="1">gfkk</li>
+<div id="content"></div>
+
+$(function() {
+	$(".test").submit(function(event){event.preventDefault();
+	var page=$('.amenu1').attr('value');var  form  =  $('form.test');
+	$.post(("/xhr_proc/"),
+{data:form.serialize()},
+	function(data){
+	$('#content').html(data);});});});
+<script type="text/javascript">
+   $(function() {
+      $("#ol").click(function() {
+         $.get("/xhr_proc/", function(data) {
+            alert(data);
+         });
+      });
+    });
+</script>
+<script type="text/javascript">
+$(function() {
+    $("#sub").click(function() {
+    $.get("/xhr_proc",{
+        name: "Berg",
+        food: "Code"
+    },
+	 function(data) {
+		alert(data);
+    });
+});});
+</script>
+<script type="text/javascript">
+   $(document).ready(function() {
+       $("#test1").submit(function(event){
+           event.preventDefault();
+var form_data=$("#test").serializeArray();
+           $.ajax({
+                type:"POST",
+                url:"/xhr_proc/",
+		data:form_data,
+success:function(data) {
+		$('#content').html(data);}});
+                    
+       });
+       return false;
+    });
+</script>
+<script type="text/javascript">
+$(function() {
+	$(".amenu").click(function(){
+	var page=$('.amenu1').attr('value');
+	$.get(("/menu/"+page),
+	function(data){
+	$('#content').html(data);});});});
+</script>
+<script type="text/javascript">
+$(function() {
+	$(".menu").click(function(){
+	var page1=$('#id_goods').attr('value');
+	var date=$('#id_date').attr('value');
+	var page=$('#id_expense').attr('value');
+	var form_data=$("#1test").serializeArray;
+	$.get(("/menu/"+page),
+	function(data){
+	$('#content').html(data);});});});
+</script>
+
+
+

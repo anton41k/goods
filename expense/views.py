@@ -1,0 +1,138 @@
+# -*- coding: utf-8 -*-
+from django.shortcuts import render_to_response,get_object_or_404
+from expense.models import *
+from django.http import Http404
+from django.http import HttpResponseRedirect, HttpResponse
+from django.core.context_processors import csrf
+from django.template import RequestContext
+from expense.forms import *
+from django.contrib import auth
+from django.conf import settings
+import os
+from django.forms.models import modelformset_factory
+from django.forms.formsets import formset_factory
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+import operator
+import datetime
+import calendar
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils.translation import ugettext as _
+from django.utils import simplejson
+
+
+def start(request, page=None, brand_goods=None):
+	form = Month()
+	month = datetime.date.today().month
+	year = 2014
+	if request.method=='POST':
+		
+		if 'month' in request.POST:
+			month = int(request.POST['month'])
+		if page in request.POST:
+			goods_get = Goods.objects.get(pk = request.POST['goods'])
+			expense_pk = [e.pk for e in Expense.objects.all() if e.date.month == month and e.date.day==int(request.POST['date']) and e.goods == goods_get]
+			if expense_pk:
+				exp = Expense.objects.get(pk = expense_pk[0])
+				setattr(exp, page, request.POST[page])
+			else:
+				exp = Expense()
+				setattr(exp, page, request.POST[page])
+				exp.goods = goods_get
+				exp.date = datetime.datetime.now().replace(year, month, int(request.POST['date']))
+			if page == 'expense':
+				if goods_get.amount >= int(request.POST[page]):
+					goods_get.amount -= int(request.POST[page])
+					exp.save()
+			elif page == 'retrieve' or page == 'coming':
+				goods_get.amount += int(request.POST[page])
+				exp.save()
+			goods_get.save()
+			if brand_goods == 'all':
+				sum_day = sum([x.__dict__[page] for x in Expense.objects.all() if x.__dict__[page] and str(x.date.day) == request.POST['date'] and x.date.month == month])
+				sum_all = sum([ x.__dict__[page] for y in Goods.objects.all() for x in Expense.objects.all() if x.goods == y and x.__dict__[page] and x.date.month == month])
+				sum_amount = sum([goods.amount for goods in Goods.objects.all()])
+				spacies=''
+				sum_spacies=''
+			else:
+				sum_day = sum([x.__dict__[page] for x in Expense.objects.all() if x.__dict__[page] and str(x.date.day) == request.POST['date'] and x.date.month == month and x.goods.brand.brand == brand_goods])
+				sum_all = sum([ x.__dict__[page] for y in Goods.objects.all() for x in y.expense.all() if x.goods.brand.brand == brand_goods and x.__dict__[page] and x.date.month == month])
+				sum_amount = sum([x.amount for x in Goods.objects.all() if x.brand.brand == brand_goods])
+				sum_spacies=sum([y.amount for x in Spacies.objects.all() for i in x.brand_set.all() if i.brand==brand_goods for y in x.spaciess.all() if y.spacies==x])
+				spacies=[x for x in Spacies.objects.all() for y in x.spaciess.all() if y.brand.brand==brand_goods][0].spacies
+			sum_goods = sum([x.__dict__[page] for x in goods_get.expense.all() if x.__dict__[page] and x.date.month == month])
+
+			dict_goods = simplejson.dumps({'spacies':spacies,'sum_spacies':sum_spacies,'sum_amount':sum_amount,'sum_all':sum_all,'sum_day':sum_day, 'sum_goods':sum_goods,'amount':goods_get.amount,'page':int(request.POST[page])})
+			return HttpResponse(dict_goods)
+	expense_list = Expense.objects.all()
+	goods_list = Goods.objects.all()
+	spacies_list = Spacies.objects.all()
+	month_str = str(month)
+	date = datetime.date(year, month, 1)
+	count_day_month = calendar.monthrange(year, month)
+	day_month = count_day_month[1]
+	list_day_month = [str(day) for day in range(1, day_month + 1)]
+	if not page or page in ['expense','retrieve','coming']:
+		action = page
+	else:
+		return HttpResponse('<font size=2, color=red>Выбирете нужную категорию (Расход, Возврат, Приход)!!!</font>')
+	month_action = [month,action]
+	templaters = 'goods.html'
+	brand = ''
+	if brand_goods and brand_goods in [x.brand.brand for x in Goods.objects.all()]:#при выборе brand товара загружаем в контейнер новый шаблон и передаем в этот шаблон соотв. brand товара
+		brand = brand_goods
+		templaters = 'detail_goods.html'
+	if brand_goods == 'all':
+		templaters = 'all_action.html'
+	if request.user.is_authenticated():
+		return render_to_response( templaters,locals(), context_instance=RequestContext(request))
+	else:return HttpResponseRedirect('/login/')
+
+def log_out(request):
+	auth.logout(request)
+	form = LoginForm()
+	return render_to_response( 'login.html', {'form': form}, context_instance=RequestContext(request))
+
+from django.contrib.auth.models import User
+
+def log_in(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            if '@' in data['username']:
+                email1=data['username']
+                try:
+                    user_obj = User.objects.get(email=email1)
+                except User.DoesNotExist:
+                    form.errors['username'] = [u'Вы неправильно ввели e-mail']           
+                else:
+                    user = auth.authenticate(username=user_obj.username, password=data['password'])
+                    if user is None:
+                        form.errors['password'] = [u'Вы неправильно ввели пароль']
+                    else:
+                        auth.login(request, user)                
+                        return HttpResponseRedirect('/goods/expense')
+            else:
+                try:
+                    user_obj = User.objects.get(username=data['username'])
+                except User.DoesNotExist:
+                    form.errors['username'] = [u'Вы неправильно ввели логин']           
+                else:
+                    user = auth.authenticate(username=data['username'], password=data['password'])
+                    if user is None:
+                        form.errors['password'] = [u'Вы неправильно ввели пароль']
+                    else:
+                        auth.login(request, user)                
+                        return HttpResponseRedirect('/goods/expense/')
+    else:
+        form = LoginForm()
+    return render_to_response( 'login.html', {'form': form}, context_instance=RequestContext(request)) 
+
+def log_out(request):
+	auth.logout(request)
+	form = LoginForm()
+	return render_to_response( 'login.html', {'form': form}, context_instance=RequestContext(request))   
+
+
+

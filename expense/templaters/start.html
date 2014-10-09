@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="ru">
+<head>
+<linc rel="stylesheet" href="static/css/style.css" type="text/css"/>
+	<title>{%block title%}{%endblock%}</title>
+<link rel="stylesheet" type="text/css" href="/static/css/head.css" />	
+
+<script type="text/javascript" src="/static/js/head.js"></script>
+<script type="text/javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+	
+</head>
+{%load staticfiles%}
+<body background="{%static "img/template-example-bg.gif"%}">
+</br>
+<a href="/goods/expense/">Расход</a>  
+<a href="/goods/retrieve/">Возврат</a>  
+<a href="/goods/coming/">Приход</a>
+{%if user.is_authenticated%}
+  <font size="2">
+    <p  align="right"> Добро пожаловать, 
+      <font size="3" color="red" face="Arial">	{{user.username}}
+      </font>.
+      <a href="/logout/">Выйти</a>
+    </p>
+  </font>
+{%else%}
+  <font size="2">
+    <p align="right">
+      <a href="/login/">Авторизация</a>
+    </p>
+  </font>
+{%endif%}
+{{name}}
+{%block content%}{%endblock%}
+</body>
+</html>

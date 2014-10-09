@@ -1,0 +1,109 @@
+*{
+
+	padding: 0;
+}
+.head {
+	border: solid black;
+	border-width: 1px 1px 1px 1px;
+	padding:0px;
+	border-spacing:0;
+	margin: 0;
+        padding:0px;
+}
+
+th{
+	background-color:#858484;
+}
+
+#day{
+	text-align:center;
+	background-color:silver;
+}
+#amount{
+	text-align:center;
+	color:#217;}
+.spacies1 a{
+	text-decoration:none;
+	color:#000;
+	cursor: pointer;
+	font-size:15px;
+}
+.spacies1 a:hover{
+	color:#217;
+	font-size:14px;
+}
+.month{
+	text-decoration:none;
+	color:#000;
+	cursor: pointer;
+	font-size:12px;
+}
+.month:hover{
+	color:#217;
+}
+.goods{
+	font-size:12px;
+}
+
+.expense {
+	font-size:15px;
+}
+
+table.goods {
+	border: 1px solid #000000;
+	border-collapse: collapse;
+	margin: 1em 0 2em 0;
+}
+table.goods th {
+	border: 1px solid #000000;
+	background-color: #858484;
+	color: #000000;
+	text-align: center;
+	padding: 0.2em 0.4em 0.2em 0.4em;
+	margin: 0;
+}
+table.goods td {
+	font-size:10px;
+	margin: 0;
+	padding:  0;
+	border: 1px solid #000000;
+
+}
+table.goods input[type="text"] {
+	font-size:10px;
+	width: 16px;
+	padding: 0.2em 0.4em 0.2em 0.4em;
+	margin: 0;
+	border-width: 0;
+	border-style: none;
+}
+div.input{	
+	text-align:center;
+	font-size:10px;
+	padding: 0;
+	margin: 0;
+	border-width: 0;
+	border-style: none;}
+
+.brand{
+	width:1500px;
+	border:solid gray;
+	border-width: 0px 0px 1px 1px;
+	padding:0px;
+	border-spacing:0;
+	margin: 0;
+        padding:0px;
+	text-decoration:none;
+	color:#000;
+	cursor: pointer;
+	font-size:12px;
+}
+.brand:hover{	padding: 0 0 0 10px;}
+select,#submit{
+	font-size:8px;
+}
+
+.inline{display:inline-block;}
+#line:hover{
+
+background-color: red;}
